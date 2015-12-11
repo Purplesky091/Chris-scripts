@@ -15,12 +15,7 @@ namespace Pillage
 
         public Map()
         {
-
-        }
-
-        private void CreateMap()
-        {
-            for(int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 map[i] = new Tile[8];
                 for (int j = 0; j < 8; j++)
@@ -30,13 +25,17 @@ namespace Pillage
             pieceID = 0;
         }
 
-        public void PlaceInitialPieces(int[] KnightStarts, int[] PeasantStarts)
+        public int[] GetPiecesByType(Piece.Type t)
         {
-            PlaceInitialKnights(KnightStarts);
-            PlaceInitialPeasants(PeasantStarts);
+            return (t == Piece.Type.Knight) ? RemoveFromArray(KnightLocations, -1) : RemoveFromArray(PeasantLocations, -1);
         }
 
-        private void PlaceInitialKnights(int[] startingLocations)
+        public int[] GetValidAttackLocations(int TileID)
+        {
+            return map[RowFromID(TileID)][ColFromID(TileID)].PieceOnTile.GetValidAttacks();
+        }
+
+        public void PlaceInitialKnights(int[] startingLocations)
         {
             for (int i = 0; i < startingLocations.Length; i++)
             {
@@ -45,13 +44,18 @@ namespace Pillage
             }
         }
 
-        private void PlaceInitialPeasants(int[] startingLocations)
+        public void PlaceInitialPeasants(int[] startingLocations)
         {
             for(int i = 0; i < startingLocations.Length; i++)
             {
                 PeasantLocations[i] = startingLocations[i];
                 map[RowFromID(startingLocations[i])][ColFromID(startingLocations[i])].PieceOnTile = new Peasant(pieceID++, startingLocations[i]);
             }
+        }
+
+        public Piece.Type GetPieceTypeAtLocation(int tileID)
+        {
+            return map[RowFromID(tileID)][ColFromID(tileID)].PieceOnTile.PieceType;
         }
 
         public void MoveKnight(int currentTile, int destinationTile)
@@ -240,7 +244,10 @@ namespace Pillage
             return false;
         }
 
-
+        private int[] RemoveFromArray(int[] array, int value)
+        {
+            return array.Where(val => val != value).ToArray();
+        }
 
         private int TileID(int row, int column) { return ((row * 10) + column); }
         private int RowFromID(int id) { return id / 10; }
